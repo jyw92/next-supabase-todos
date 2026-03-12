@@ -1,0 +1,7 @@
+.inner__container {
+  @include flex($items: center, $gap: 12px);
+
+  &__label {
+    color: #6d6d6d;
+  }
+}

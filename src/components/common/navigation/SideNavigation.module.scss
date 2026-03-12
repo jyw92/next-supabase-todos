@@ -1,0 +1,43 @@
+@use '@/styles/abstracts/mixins' as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  width: 280px;
+  height: 100vh;
+
+  padding: 20px 24px;
+
+  border-width: 0px 1px 0px 1px;
+  border-style: solid;
+  border-color: #e6e6e6;
+
+  &__searchBox {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 4px;
+  }
+
+  &__buttonBox {
+    @include flex-center;
+
+    width: 100%;
+    margin-block: 12px;
+  }
+  &__todos {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+
+    &__label {
+      margin-block: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #a6a6a6;
+    }
+  }
+}

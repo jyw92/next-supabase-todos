@@ -1,0 +1,47 @@
+.inner {
+  &__container {
+    @include flex($direction: column, $items: center);
+    width: 100%;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.2);
+
+    &__header {
+      @include flex($items: center, $justify: space-between, $direction: column);
+      width: 100%;
+      &__titleBox {
+        width: 100%;
+        font-weight: 500;
+        font-size: 24px;
+        color: #454545;
+        @include flex($items: center, $gap: 16px);
+        flex: 1;
+        .title {
+          width: 100%;
+          font-weight: 500;
+          font-size: 24px;
+          color: #454545;
+          &::placeholder {
+            font-weight: 500;
+            color: #bdbdbd;
+          }
+        }
+      }
+    }
+    &__body {
+      @include flex($items: center, $justify: space-between);
+      width: 100%;
+      margin: 24px 0 14px;
+      &__calendarBox {
+        @include flex($items: center, $gap: 16px);
+      }
+    }
+    &__footer {
+      @include flex-center;
+      width: 100%;
+      padding-top: 14px;
+      border-top: 1px solid #bdbdbd;
+    }
+  }
+}
