@@ -1,10 +1,10 @@
 // 경로: src/app/api/todo/search/[id]/route.ts
 
-import {NextResponse} from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 import {createClient} from '@/utils/supabase/server';
 
 // 💡 params 타입이 { id: string } 으로 변경되었습니다. (폴더명과 동일)
-export async function GET({params}: {params: Promise<{id: string}>}) {
+export async function GET(request: NextRequest, {params}: {params: Promise<{id: string}>}) {
   try {
     // 💡 URL에서 id 값을 꺼냅니다. (예: /api/todo/search/4 -> id는 '4')
     const {id} = await params;
