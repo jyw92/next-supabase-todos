@@ -1,12 +1,9 @@
 'use client';
 
-import {useRouter} from 'next/navigation';
 import {Button} from '@/components/ui/button';
 import styles from './empty-state.module.scss';
 
 function EmptyState() {
-  const router = useRouter();
-
   return (
     <div className={styles.inner__container__onBoarding}>
       <span className={styles.inner__container__onBoarding__title}>How to Start:</span>
@@ -18,7 +15,6 @@ function EmptyState() {
       <Button
         variant={'outline'}
         className="w-full bg-transparent text-orange-500 border-orange-400 hover:bg-orange-50 hover:text-orange-500"
-        onClick={() => router.push('/create')}
       >
         Add New Page
       </Button>

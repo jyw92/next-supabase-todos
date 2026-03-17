@@ -1,4 +1,4 @@
-import EmptyState from './_components/empty-state';
+import EmptyState from '@/components/empty/empty-state';
 
 function Home() {
   return <EmptyState />;

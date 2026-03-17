@@ -3,7 +3,7 @@ import {Roboto} from 'next/font/google'; // Roboto 임포트
 import '@/styles/globals.css';
 import styles from './page.module.scss';
 import {Toaster} from '@/components/ui/sonner';
-import SideNavigation from '@/components/common/navigation/SideNavigation';
+import SideNavigation from '@/components/navigation/SideNavigation';
 
 // Roboto 설정: 사용할 두께와 subsets를 정의합니다.
 const roboto = Roboto({
