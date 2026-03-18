@@ -48,7 +48,7 @@ export default function MarkdownDialog({data, onConfirm}: Props) {
       <DialogContent className="sm:max-w-fit">
         <DialogHeader className="w-full">
           {/* 💡 에러 해결: 화면엔 안 보이지만 에러는 막아주는 투명 타이틀! */}
-          <DialogTitle className="sr-only">내용 편집기</DialogTitle>
+          <DialogTitle>상세 내용</DialogTitle>
 
           <div className={styles.dialog__markdown} data-color-mode="light">
             <MDEditor height={400} value={content} onChange={(val) => setContent(val || '')} />

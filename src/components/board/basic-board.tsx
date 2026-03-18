@@ -100,7 +100,7 @@ function BasicBoard({data}: Props) {
           </div>
         )}
 
-        <div className="w-full flex justify-end">
+        <div className="w-full flex justify-center">
           <MarkdownDialog
             data={{...data, title: localTitle, content: localContent}}
             onConfirm={(newContent) => {
