@@ -16,7 +16,7 @@ import {useEffect, useState} from 'react';
 import {TodoEntity} from '@/types';
 
 interface Props {
-  data: TodoEntity;
+  data: Pick<TodoEntity, 'content'>;
   onConfirm: (newContent: string) => void;
 }
 
