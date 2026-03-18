@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       {/* body에 roboto.className을 추가하여 기본 폰트로 적용합니다 */}
-      <body className={`${roboto.className} antialiased`}>
+      <body className={`${roboto.className} antialiased overflow-hidden`}>
         <SideNavigation />
         <div className={styles.container}>{children}</div>
         <Toaster position="top-center" />

@@ -27,7 +27,8 @@
     padding-top: 16px;
   }
   &__markdown {
-    height: 50vh;
+    height: fit-content;
+    padding-top: 30px;
   }
   &__buttonBox {
     display: flex;

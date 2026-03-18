@@ -4,7 +4,6 @@
     width: 100%;
     padding: 20px;
     background-color: #fff;
-    border-radius: 4px;
     box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.2);
 
     &__header {
@@ -38,7 +37,6 @@
       }
     }
     &__footer {
-      @include flex-center;
       width: 100%;
       padding-top: 14px;
       border-top: 1px solid #bdbdbd;

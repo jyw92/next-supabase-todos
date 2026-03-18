@@ -15,7 +15,11 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{id: 
 
     // 💡 DB 조회 (todo_id 컬럼에 id 값을 넣어서 검색)
     // 만약 Supabase 컬럼명이 todo_id가 아니라면 알맞게 수정해주세요.
-    const {data, error} = await supabase.from('todotable').select('*').eq('todo_id', id); // DB의 todo_id 값과 URL의 id 값이 같은 것을 찾음
+    const {data, error} = await supabase
+      .from('todotable')
+      .select('*')
+      .eq('todo_id', Number(id))
+      .order('created_at', {ascending: true}); // DB의 todo_id 값과 URL의 id 값이 같은 것을 찾음
 
     if (error) {
       console.error('🚨 Supabase DB 에러:', error);

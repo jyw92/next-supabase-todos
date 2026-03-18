@@ -10,15 +10,16 @@ import {debounce} from 'lodash';
 import {PageEntity, TodoEntity} from '@/types'; // 💡 TodoEntity 추가
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import BasicBoard from '@/components/board/basic-board';
+import {Skeleton} from '@/components/ui/skeleton';
 
 function CreatePage() {
   const pathname = usePathname();
   const pageId = Number(pathname.split('/')[2]);
-
+  console.log('pageId', pageId);
   const storePages = usePageStore((state) => state.storePages);
   const fetchSidebarPages = usePageStore((state) => state.fetchSidebarPages);
   const updateStorePage = usePageStore((state) => state.updateStorePage);
-
+  const [isLoading, setIsLoading] = useState(true);
   const currentPage = storePages.find((p) => p.id === pageId);
 
   const [localTitle, setLocalTitle] = useState(currentPage?.page_title ?? '');
@@ -71,13 +72,15 @@ function CreatePage() {
   const fetchTodos = useCallback(async () => {
     if (!pageId) return;
     try {
-      const response = await fetch(`/api/todo/search/${pageId}`);
+      const response = await fetch(`/api/todo/search/${pageId}`, {next: {tags: ['todos']}});
       const result = await response.json();
       if (result.success) {
         setTodos(result.data);
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   }, [pageId]);
 
@@ -90,8 +93,32 @@ function CreatePage() {
     initFetch();
   }, [fetchTodos]);
 
-  // ✅ [추가] Add New Board 버튼 클릭 시 새 보드 생성
-  const handleCreateNewBoard = async () => {};
+  const handleCreateNewBoard = async () => {
+    if (!pageId) return;
+    try {
+      const response = await fetch(`/api/todo/create/${pageId}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title: '새로운 할 일 보드',
+          content: '',
+          start_date: new Date().toISOString(), // 💡 오늘 날짜 추가
+          end_date: new Date().toISOString(), // 💡 종료 날짜 추가
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // ✅ 상태만 업데이트해서 즉시 반영 (추가적인 fetch 호출 없음)
+        setTodos((prev) => [...prev, result.data]);
+      } else {
+        alert(`생성 실패: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('네트워크 에러:', error);
+    }
+  };
 
   return (
     <div className={styles.inner__container}>
@@ -133,11 +160,39 @@ function CreatePage() {
         </div>
       </header>
 
-      <main className={styles.inner__container__body}>
-        {/* ✅ 가져온 데이터를 바탕으로 BasicBoard 리스트 렌더링 */}
-        {todos.map((todo) => (
-          <BasicBoard key={todo.id} data={todo} onRefresh={fetchTodos} />
-        ))}
+      <main className={`${styles.inner__container__body} ${todos.length > 0 || 'items-center'}`}>
+        {isLoading ? (
+          // ✅ 로딩 중일 때 스켈레톤 UI 렌더링
+          <div className="flex flex-col gap-4 w-full">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="w-full h-[184px] p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3"
+              >
+                {/* 제목 부분 스켈레톤 */}
+                <Skeleton className="h-6 w-1/3 rounded-md" />
+                {/* 날짜/진행률 부분 스켈레톤 */}
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-4 w-24 rounded-md" />
+                  <Skeleton className="h-2 flex-1 rounded-full" />
+                </div>
+                {/* 하단 태그/인원 부분 스켈레톤 */}
+                <div className="flex gap-2">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : todos.length > 0 ? (
+          // ✅ 데이터 로딩 완료 후 목록 렌더링
+          todos.map((todo) => <BasicBoard key={todo.id} data={todo} />)
+        ) : (
+          // ✅ 데이터가 없을 때 (Empty State)
+          <div className="p-10 text-center text-gray-400 w-full h-full flex flex-1 justify-center items-center">
+            등록된 보드가 없습니다.
+          </div>
+        )}
       </main>
     </div>
   );

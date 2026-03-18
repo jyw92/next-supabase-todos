@@ -15,7 +15,6 @@
       @include flex($direction: column);
       width: 100%;
       padding: 20px 28px;
-      margin-top: 68px;
       input {
         font-size: 36px;
         font-weight: 700;
@@ -45,9 +44,10 @@
   &__body {
     @include flex($direction: column, $items: flex-start);
     width: 100%;
-    height: calc(100% - 250px);
+    flex: 1;
     padding: 28px 16px;
     gap: 20px;
+    overflow-y: auto;
   }
   &__infoBox {
     flex-direction: column;

@@ -45,6 +45,7 @@ export type Database = {
           created_at: string | null
           end_date: string | null
           id: number
+          isSave: boolean | null
           start_date: string | null
           title: string | null
           todo_id: number | null
@@ -55,6 +56,7 @@ export type Database = {
           created_at?: string | null
           end_date?: string | null
           id?: never
+          isSave?: boolean | null
           start_date?: string | null
           title?: string | null
           todo_id?: number | null
@@ -65,6 +67,7 @@ export type Database = {
           created_at?: string | null
           end_date?: string | null
           id?: never
+          isSave?: boolean | null
           start_date?: string | null
           title?: string | null
           todo_id?: number | null

@@ -32,7 +32,7 @@ export const usePageStore = create<PageState>((set, get) => ({
 
     try {
       // 서버 전송 (PATCH)
-      await fetch(`/api/page/patch/${id}`, {
+      await fetch(`/api/page/update/${id}`, {
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(rest),
