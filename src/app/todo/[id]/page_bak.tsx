@@ -7,35 +7,29 @@ import LabelCalendar from '@/components/calendar/label-calendar';
 import {usePathname} from 'next/navigation';
 import {usePageStore} from '@/store/usePageStore';
 import {debounce} from 'lodash';
-import {PageEntity, TodoEntity} from '@/types';
-import {useCallback, useEffect, useMemo, useState, useTransition} from 'react'; // 💡 useTransition 추가
+import {PageEntity, TodoEntity} from '@/types'; // 💡 TodoEntity 추가
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import BasicBoard from '@/components/board/basic-board';
 import {Skeleton} from '@/components/ui/skeleton';
 
-function CreatePage() {
+function CreatePage_bak() {
   const pathname = usePathname();
   const pageId = Number(pathname.split('/')[2]);
-
+  console.log('pageId', pageId);
   const storePages = usePageStore((state) => state.storePages);
   const fetchSidebarPages = usePageStore((state) => state.fetchSidebarPages);
   const updateStorePage = usePageStore((state) => state.updateStorePage);
-
-  // 💡 isLoading은 첫 진입(데이터가 아예 없을 때)에만 쓰고,
-  // 이후 페이지 전환은 isPending으로 부드럽게 처리합니다.
   const [isLoading, setIsLoading] = useState(true);
-  const [isPending, startTransition] = useTransition();
-
   const currentPage = storePages.find((p) => p.id === pageId);
+
   const [localTitle, setLocalTitle] = useState(currentPage?.page_title ?? '');
   const [lastSyncedTitle, setLastSyncedTitle] = useState(currentPage?.page_title);
 
-  // 상위 스토어 데이터와 로컬 상태 동기화
   if (currentPage?.page_title !== lastSyncedTitle) {
     setLastSyncedTitle(currentPage?.page_title);
     setLocalTitle(currentPage?.page_title ?? '');
   }
 
-  // 디바운스 업데이트 로직
   const debouncedDateUpdate = useMemo(
     () => debounce((data: Partial<PageEntity> & {id: number}) => updateStorePage(data), 100),
     [updateStorePage],
@@ -61,12 +55,10 @@ function CreatePage() {
     return isNaN(date.getTime()) ? undefined : date;
   };
 
-  // 사이드바 데이터 초기화
   useEffect(() => {
     if (storePages.length === 0) fetchSidebarPages();
   }, [storePages.length, fetchSidebarPages]);
 
-  // 언마운트 시 디바운스 취소
   useEffect(() => {
     return () => {
       debouncedDateUpdate.cancel();
@@ -74,22 +66,16 @@ function CreatePage() {
     };
   }, [debouncedDateUpdate, debouncedTitleUpdate]);
 
-  // ✅ Todo 목록 상태
+  // ✅ [수정] 배열 형태로 Todo 목록 상태 관리
   const [todos, setTodos] = useState<TodoEntity[]>([]);
 
-  // ✅ [개선] fetchTodos를 호출할 때 startTransition을 활용합니다.
   const fetchTodos = useCallback(async () => {
     if (!pageId) return;
     try {
-      const response = await fetch(`/api/todo/search/${pageId}`);
+      const response = await fetch(`/api/todo/search/${pageId}`, {next: {tags: ['todos']}});
       const result = await response.json();
-
       if (result.success) {
-        // 💡 핵심: 새 데이터를 상태에 반영하는 과정을 Transition으로 감쌉니다.
-        // 리액트는 새 리스트 렌더링이 끝날 때까지 화면 전환을 '보류'합니다.
-        startTransition(() => {
-          setTodos(result.data);
-        });
+        setTodos(result.data);
       }
     } catch (error) {
       console.log(error);
@@ -98,8 +84,13 @@ function CreatePage() {
     }
   }, [pageId]);
 
+  // ✅ [해결] useEffect 내부에서 async 함수를 만들고 그 안에서 호출하도록 변경!
   useEffect(() => {
-    fetchTodos();
+    const initFetch = async () => {
+      await fetchTodos();
+    };
+
+    initFetch();
   }, [fetchTodos]);
 
   const handleCreateNewBoard = async () => {
@@ -111,13 +102,15 @@ function CreatePage() {
         body: JSON.stringify({
           title: '새로운 할 일 보드',
           content: '',
-          start_date: new Date().toISOString(),
-          end_date: new Date().toISOString(),
+          start_date: new Date().toISOString(), // 💡 오늘 날짜 추가
+          end_date: new Date().toISOString(), // 💡 종료 날짜 추가
         }),
       });
 
       const result = await response.json();
+
       if (result.success) {
+        // ✅ 상태만 업데이트해서 즉시 반영 (추가적인 fetch 호출 없음)
         setTodos((prev) => [...prev, result.data]);
       } else {
         alert(`생성 실패: ${result.error}`);
@@ -131,18 +124,13 @@ function CreatePage() {
     <div className={styles.inner__container}>
       <header className={styles.inner__container__header}>
         <div className={styles.inner__container__header__contents}>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Enter Title Here"
-              className={styles.input}
-              value={localTitle}
-              onChange={onTitleChange}
-            />
-            {/* 💡 페이지 전환 중일 때 작은 로딩 표시 (UX 포인트) */}
-            {isPending && <span className="text-xs text-orange-400 animate-pulse font-medium">Updating...</span>}
-          </div>
-
+          <input
+            type="text"
+            placeholder="Enter Title Here"
+            className={styles.input}
+            value={localTitle}
+            onChange={onTitleChange}
+          />
           <div className={styles.progressBar}>
             <span className={styles.progressBar__status}>0/10 completed</span>
             <Progress value={33} className="w-[30%] h-2" indicatorColor="bg-green-500" />
@@ -160,6 +148,7 @@ function CreatePage() {
                 onDateChange={(date) => handleUpdate({end_date: date ? date.toISOString() : null})}
               />
             </div>
+            {/* ✅ 클릭 이벤트 연결 */}
             <Button
               onClick={handleCreateNewBoard}
               variant={'outline'}
@@ -171,28 +160,23 @@ function CreatePage() {
         </div>
       </header>
 
-      {/* 💡 isPending일 때 opacity를 주어 '데이터 교체 중'임을 부드럽게 알림 */}
-      <main
-        className={`${styles.inner__container__body} ${todos.length > 0 || 'items-center'}`}
-        style={{
-          opacity: isPending ? 0.5 : 1,
-          transition: 'opacity 0.2s ease-in-out',
-          pointerEvents: isPending ? 'none' : 'auto', // 업데이트 중 클릭 방지
-        }}
-      >
+      <main className={`${styles.inner__container__body} ${todos.length > 0 || 'items-center'}`}>
         {isLoading ? (
-          // 첫 로딩 혹은 데이터가 없을 때만 스켈레톤
+          // ✅ 로딩 중일 때 스켈레톤 UI 렌더링
           <div className="flex flex-col gap-4 w-full">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
                 className="w-full h-[184px] p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3"
               >
+                {/* 제목 부분 스켈레톤 */}
                 <Skeleton className="h-6 w-1/3 rounded-md" />
+                {/* 날짜/진행률 부분 스켈레톤 */}
                 <div className="flex items-center gap-4">
                   <Skeleton className="h-4 w-24 rounded-md" />
                   <Skeleton className="h-2 flex-1 rounded-full" />
                 </div>
+                {/* 하단 태그/인원 부분 스켈레톤 */}
                 <div className="flex gap-2">
                   <Skeleton className="h-5 w-16 rounded-full" />
                   <Skeleton className="h-5 w-16 rounded-full" />
@@ -201,8 +185,10 @@ function CreatePage() {
             ))}
           </div>
         ) : todos.length > 0 ? (
+          // ✅ 데이터 로딩 완료 후 목록 렌더링
           todos.map((todo) => <BasicBoard key={todo.id} data={todo} />)
         ) : (
+          // ✅ 데이터가 없을 때 (Empty State)
           <div className="p-10 text-center text-gray-400 w-full h-full flex flex-1 justify-center items-center">
             등록된 보드가 없습니다.
           </div>

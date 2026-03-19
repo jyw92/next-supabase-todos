@@ -8,12 +8,13 @@ import {Dot, Search} from 'lucide-react';
 import styles from './SideNavigation.module.scss';
 import {Input} from '@/components/ui/input';
 import {usePageStore} from '@/store/usePageStore';
-import {useEffect} from 'react';
+import {useEffect, useTransition} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 
 function SideNavigation() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const storePages = usePageStore((state) => state.storePages);
   const fetchSidebarPages = usePageStore((state) => state.fetchSidebarPages);
   const addPage = usePageStore((state) => state.addPage);
@@ -28,12 +29,15 @@ function SideNavigation() {
     const newPage = await addPage();
     // newPage가 PageEntity 타입임을 인식하므로 .id를 쓸 수 있습니다.
     if (newPage && newPage.id) {
-      router.push(`/todo/${newPage.id}`);
+      startTransition(() => {
+        router.push(`/todo/${newPage.id}`);
+      });
     }
   };
 
   return (
     <div className={styles.container}>
+      {isPending && <div className="loading-overlay">이동 중...</div>}
       {/* 검색창 */}
       <div className={styles.container__searchBox}>
         <Input type="search" placeholder="검색어를 입력해주세요." className="focus-visible:ring-0" />
